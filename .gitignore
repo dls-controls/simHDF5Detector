@@ -1,0 +1,10 @@
+*~
+bin
+**/O.linux*
+**/O.vxWorks*
+**/O.Common
+dbd
+documentation/doxygen
+iocs/example
+iocs/example_sim
+
