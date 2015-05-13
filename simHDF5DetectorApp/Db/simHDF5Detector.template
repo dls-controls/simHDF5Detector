@@ -1,0 +1,150 @@
+#% macro, P, Device Prefix
+#% macro, R, Device Suffix
+#% macro, PORT, Asyn Port name
+#% macro, ADDR, Asyn Port address
+#% macro, TIMEOUT, Asyn timeout
+
+# This associates the template with an edm screen
+# % gui, $(PORT), edmtab, simHDF5Detector.edl, P=$(P),R=$(R)
+
+# File path.
+record(waveform, "$(P)$(R)Filename")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSim_Filename")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+}
+
+record(waveform, "$(P)$(R)Filename_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),0)ADSim_Filename")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(P)$(R)FileValid_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_FileValid")
+    field(ZNAM, "No")
+    field(ZSV,  "MAJOR")
+    field(ONAM, "Yes")
+    field(OSV,  "NO_ALARM")
+    field(SCAN, "I/O Intr")
+}
+
+record(bo, "$(P)$(R)LoadFile")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0)ADSim_LoadFile")
+}
+
+record(longin, "$(P)$(R)NoOfDatasets_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_NumOfDsets")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "$(P)$(R)DatasetIndex")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0)ADSim_DsetIndex")
+}
+
+record(longin, "$(P)$(R)DatasetIndex_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetIndex")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)$(R)DatasetName_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetName")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(R)NoOfDimensions_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetNumDims")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(R)Dimension1_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetDim1")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(R)Dimension2_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetDim2")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(R)Dimension3_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetDim3")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(R)Dimension4_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetDim4")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(R)Dimension5_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetDim5")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)$(R)Dimension6_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_DsetDim6")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "$(P)$(R)XDimension")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0)ADSim_XDim")
+}
+
+record(longin, "$(P)$(R)XDimension_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_XDim")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "$(P)$(R)YDimension")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0)ADSim_YDim")
+}
+
+record(longin, "$(P)$(R)YDimension_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0)ADSim_YDim")
+    field(SCAN, "I/O Intr")
+}
+
+

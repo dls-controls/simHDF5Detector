@@ -1,0 +1,2 @@
+registrar("SimHDF5DetectorRegister")
+
