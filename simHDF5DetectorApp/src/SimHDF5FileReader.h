@@ -30,8 +30,10 @@ public:
   std::vector<std::string> getDatasetKeys();
   std::vector<int> getDatasetDimensions(const std::string& dname);
   NDDataType_t getDatasetType(const std::string& dname);
+  void prepareToReadDataset(const std::string& dname);
   void readFromDataset(const std::string& dname, int wdim, int hdim, void *data);
   void readFromDataset(const std::string& dname, int wdim, int hdim, int *indexes, void *data);
+  void cleanupDataset();
   void process(hid_t loc_id, const char *name, H5G_obj_t type);
 
 private:
@@ -39,6 +41,13 @@ private:
   std::string filename;
   std::string cname;
   bool fileLoaded;
+  hid_t dset_id;
+  hid_t dspace_id;
+  int ndims;
+  hsize_t *dims;
+  hid_t type_id;
+  hid_t ntype_id;
+  bool reading;
 
   class HDF5Dataset
   {

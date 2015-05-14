@@ -8,6 +8,7 @@
 #include "SimHDF5FileReader.h"
 #include <iostream>
 #include <sys/stat.h>
+#include <stdlib.h>
 
 herr_t file_info(hid_t loc_id, const char *name, void *opdata)
 {
@@ -24,7 +25,14 @@ herr_t file_info(hid_t loc_id, const char *name, void *opdata)
 SimHDF5FileReader::SimHDF5FileReader() :
   file(0),
   filename(""),
-  fileLoaded(false)
+  fileLoaded(false),
+  dset_id(0),
+  dspace_id(0),
+  ndims(0),
+  dims(0),
+  type_id(0),
+  ntype_id(0),
+  reading(false)
 {
 
 }
@@ -167,6 +175,20 @@ NDDataType_t SimHDF5FileReader::getDatasetType(const std::string& dname)
   return NDType;
 }
 
+void SimHDF5FileReader::prepareToReadDataset(const std::string& dname)
+{
+  if (!reading){
+    dset_id = H5Dopen(this->file, dname.c_str(), H5P_DEFAULT);
+    dspace_id = H5Dget_space(dset_id);
+    ndims = H5Sget_simple_extent_ndims(dspace_id);
+    dims = (hsize_t *)malloc(sizeof(hsize_t) * ndims);
+    H5Sget_simple_extent_dims(dspace_id, dims, NULL);
+    type_id = H5Dget_type(dset_id);
+    ntype_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
+    reading = true;
+  }
+}
+
 void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int hdim, void *data)
 {
   int indexes[6] = {0,0,0,0,0,0};
@@ -178,13 +200,6 @@ void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int 
   hid_t memspace;    // Memory space ID
   hsize_t dimsm[2];  // Memory space dimensions
   herr_t status;
-  hid_t dset = H5Dopen(this->file, dname.c_str(), H5P_DEFAULT);
-  hid_t dspace = H5Dget_space(dset);
-  const int ndims = H5Sget_simple_extent_ndims(dspace);
-  hsize_t dims[ndims];
-  H5Sget_simple_extent_dims(dspace, dims, NULL);
-  hid_t type = H5Dget_type(dset);
-  hid_t ntype = H5Tget_native_type(type, H5T_DIR_ASCEND);
 
   hsize_t count[ndims];  // Size of the hyperslab in the file
   hsize_t offset[ndims]; // Hyperslab offset in the file
@@ -211,7 +226,7 @@ void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int 
   count[wdim] = dims[wdim];
   count[hdim] = dims[hdim];
   // Select the hyperslab
-  status = H5Sselect_hyperslab(dspace, H5S_SELECT_SET, offset, NULL, count, NULL);
+  status = H5Sselect_hyperslab(dspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
 
   // Define the memory dataspace.
   dimsm[0] = dims[wdim];
@@ -228,14 +243,21 @@ void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int 
   status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, count_out, NULL);
 
   // Read data from hyperslab in the file into the hyperslab in memory and to the data pointer
-  status = H5Dread(dset, ntype, memspace, dspace, H5P_DEFAULT, data);
+  status = H5Dread(dset_id, ntype_id, memspace, dspace_id, H5P_DEFAULT, data);
 
-  H5Tclose(ntype);
-  H5Tclose(type);
   H5Sclose(memspace);
-  H5Sclose(dspace);
-  H5Dclose(dset);
+}
 
+void SimHDF5FileReader::cleanupDataset()
+{
+  if (reading){
+    H5Tclose(ntype_id);
+    H5Tclose(type_id);
+    H5Sclose(dspace_id);
+    H5Dclose(dset_id);
+    free(dims);
+    reading = false;
+  }
 }
 
 void SimHDF5FileReader::process(hid_t loc_id, const char *name, H5G_obj_t type)

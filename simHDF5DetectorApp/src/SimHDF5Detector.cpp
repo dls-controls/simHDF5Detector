@@ -133,6 +133,10 @@ void SimHDF5Detector::acqTask()
   while (1){
     // If we are not acquiring then wait for a semaphore that is given when acquisition is started
     if (!acquire){
+      setStringParam(ADStatusMessage, "Waiting to start acquisition");
+      callParamCallbacks();
+      // Close any previously opened dataset
+      fileReader->cleanupDataset();
       // Release the lock while we wait for an event that says acquire has started, then lock again
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
                 "%s:%s: waiting for acquire to start\n", driverName, functionName);
@@ -142,6 +146,11 @@ void SimHDF5Detector::acqTask()
       acquire = 1;
       setStringParam(ADStatusMessage, "Acquiring data");
       setIntegerParam(ADNumImagesCounter, 0);
+      // Read the dataset index and prepare for reading
+      int dsetIndex = 0;
+      getIntegerParam(ADSim_DsetIndex, &dsetIndex);
+      dsetIndex--;
+      fileReader->prepareToReadDataset(fileReader->getDatasetKeys()[dsetIndex]);
     }
 
     // We are acquiring.
@@ -161,13 +170,13 @@ void SimHDF5Detector::acqTask()
 
     // Simulate being busy during the exposure time.  Use epicsEventWaitWithTimeout so that
     // manually stopping the acquisition will work
-    if (acquireTime > 0.0){
-      this->unlock();
-      status = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
-      this->lock();
-    } else {
+//    if (acquireTime > 0.0){
+//      this->unlock();
+//      status = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
+//      this->lock();
+//    } else {
       status = epicsEventTryWait(this->stopEventId);
-    }
+//    }
     if (status == epicsEventWaitOK){
       acquire = 0;
       if (imageMode == ADImageContinuous){
@@ -224,7 +233,6 @@ void SimHDF5Detector::acqTask()
         (numImagesCounter >= numImages))){
 
       // First do callback on ADStatus.
-      setStringParam(ADStatusMessage, "Waiting for acquisition");
       setIntegerParam(ADStatus, ADStatusIdle);
       callParamCallbacks();
 
