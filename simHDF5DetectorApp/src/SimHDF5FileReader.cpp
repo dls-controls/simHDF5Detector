@@ -54,15 +54,16 @@ bool SimHDF5FileReader::validateFilename()
     validated = false;
   }
 
-  // Now attempt to open the file
-  fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, NULL);
-  if (fid < 0){
-    validated = false;
-  } else {
-    // Close the file again
-    H5Fclose(fid);
+  if (validated){
+    // Now attempt to open the file
+    fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, NULL);
+    if (fid < 0){
+      validated = false;
+    } else {
+      // Close the file again
+      H5Fclose(fid);
+    }
   }
-
   return validated;
 }
 
@@ -243,7 +244,9 @@ void SimHDF5FileReader::process(hid_t loc_id, const char *name, H5G_obj_t type)
   std::string oldname = cname;
   cname = cname + "/" + sname;
   if (type == H5G_DATASET){
-    datasets[cname] = std::tr1::shared_ptr<HDF5Dataset>(new HDF5Dataset(name, loc_id));
+    if (getDatasetDimensions(cname).size() > 2){
+      datasets[cname] = std::tr1::shared_ptr<HDF5Dataset>(new HDF5Dataset(name, loc_id));
+    }
   }
   if (type == H5G_GROUP){
     H5Giterate(loc_id, name, NULL, file_info, this);
