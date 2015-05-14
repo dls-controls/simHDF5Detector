@@ -10,7 +10,6 @@
 # File path.
 record(waveform, "$(P)$(R)Filename")
 {
-    field(PINI, "YES")
     field(DTYP, "asynOctetWrite")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSim_Filename")
     field(FTVL, "CHAR")
