@@ -48,7 +48,6 @@ SimHDF5Detector::SimHDF5Detector(const char *portName,
   // Create parameters for control of the driver
   createParam(str_ADSim_Filename,      asynParamOctet,   &ADSim_Filename);
   createParam(str_ADSim_FileValid,     asynParamInt32,   &ADSim_FileValid);
-  createParam(str_ADSim_LoadFile,      asynParamInt32,   &ADSim_LoadFile);
   createParam(str_ADSim_NumOfDsets,    asynParamInt32,   &ADSim_NumOfDsets);
   createParam(str_ADSim_DsetIndex,     asynParamInt32,   &ADSim_DsetIndex);
   createParam(str_ADSim_DsetName,      asynParamOctet,   &ADSim_DsetName);
@@ -66,7 +65,6 @@ SimHDF5Detector::SimHDF5Detector(const char *portName,
   // Create sensible default values for the parameters
   setStringParam (ADSim_Filename,    "");
   setIntegerParam(ADSim_FileValid,   0);
-  setIntegerParam(ADSim_LoadFile,    0);
   setIntegerParam(ADSim_NumOfDsets,  0);
   setIntegerParam(ADSim_DsetIndex,   0);
   setStringParam (ADSim_DsetName,    "");
@@ -316,18 +314,6 @@ asynStatus SimHDF5Detector::writeInt32(asynUser *pasynUser, epicsInt32 value)
         // Send the stop event
         epicsEventSignal(this->stopEventId);
       }
-    } else if (function == ADSim_LoadFile){
-      // Call the loadFile function
-      status = loadFile();
-      if (status == asynError){
-        // If a bad value is set then revert it to the original
-        setIntegerParam(function, oldvalue);
-        // Set the valid flag to false so we do not start bad acquisitions
-        validFile = false;
-      } else {
-        // Set the valid flag to true, we can start acquisitions
-        validFile = true;
-      }
     } else if (function == ADSim_DsetIndex){
       // Call the updateSourceImage function
       status = readDatasetInfo();
@@ -398,6 +384,15 @@ asynStatus SimHDF5Detector::writeOctet(asynUser *pasynUser, const char *value, s
     // Now validate the filename
     if (fileReader->validateFilename()){
       setIntegerParam(ADSim_FileValid, 1);
+      // Call the loadFile function
+      status = loadFile();
+      if (status == asynError){
+        // Set the valid flag to false so we do not start bad acquisitions
+        validFile = false;
+      } else {
+        // Set the valid flag to true, we can start acquisitions
+        validFile = true;
+      }
     } else {
       setIntegerParam(ADSim_FileValid, 0);
       status = asynError;

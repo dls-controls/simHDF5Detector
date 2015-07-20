@@ -14,7 +14,6 @@
 
 #define str_ADSim_Filename        "ADSim_Filename"
 #define str_ADSim_FileValid       "ADSim_FileValid"
-#define str_ADSim_LoadFile        "ADSim_LoadFile"
 #define str_ADSim_NumOfDsets      "ADSim_NumOfDsets"
 #define str_ADSim_DsetIndex       "ADSim_DsetIndex"
 #define str_ADSim_DsetName        "ADSim_DsetName"
@@ -47,7 +46,6 @@ protected:
   int ADSim_Filename;         // Filename of HDF5 file to use for data source
   #define FIRST_ADSIM_DETECTOR_PARAM ADSim_Filename
   int ADSim_FileValid;        // Is the specified filename a valid file
-  int ADSim_LoadFile;         // Command to attempt to load the specified HDF5 file
   int ADSim_NumOfDsets;       // Number of datasets found within HDF5 file
   int ADSim_DsetIndex;        // Index of currently selected dataset
   int ADSim_DsetName;         // Name of currently selected dataset

@@ -7,6 +7,8 @@
 # This associates the template with an edm screen
 # % gui, $(PORT), edmtab, simHDF5Detector.edl, P=$(P),R=$(R)
 
+include "ADBase.template"
+
 # File path.
 record(waveform, "$(P)$(R)Filename")
 {
@@ -34,12 +36,6 @@ record(bi, "$(P)$(R)FileValid_RBV")
     field(ONAM, "Yes")
     field(OSV,  "NO_ALARM")
     field(SCAN, "I/O Intr")
-}
-
-record(bo, "$(P)$(R)LoadFile")
-{
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0)ADSim_LoadFile")
 }
 
 record(longin, "$(P)$(R)NoOfDatasets_RBV")
