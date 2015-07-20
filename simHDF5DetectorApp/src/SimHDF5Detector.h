@@ -68,11 +68,11 @@ private:
   asynStatus readDatasetInfo();
   asynStatus updateSourceImage();
 
-  std::tr1::shared_ptr<SimHDF5FileReader> fileReader;
-  bool validFile;
-  epicsEventId startEventId;  // Event used to signal acquisition start
-  epicsEventId stopEventId;   // Event used to signal acquisition stop
-  NDArray *pRaw;
+  std::tr1::shared_ptr<SimHDF5FileReader> fileReader;  // Filereader used for importing HDF5 datasets
+  bool validFile;                                      // Is the current file valid?
+  epicsEventId startEventId;                           // Event used to signal acquisition start
+  epicsEventId stopEventId;                            // Event used to signal acquisition stop
+  NDArray *pRaw;                                       // Pointer to NDArrays ready to process
 
 };
 

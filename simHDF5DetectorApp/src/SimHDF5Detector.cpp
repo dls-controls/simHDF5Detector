@@ -10,11 +10,18 @@
 #include <drvSup.h>
 #include <epicsExport.h>
 #include <iostream>
+#include <sstream>
 #include "SimHDF5Detector.h"
 
 static const char *driverName = "SimHDF5Detector";
 
 
+/** C function called by newly created thread.
+  * \param[in] drvPvt pointer to a void that is supplied by the thread create function.
+  *
+  * C function called in a seperate thread.  The pointer will point to the SimHDF5Detector
+  * object that created the thread and can be used to call the appropriate method.
+  */
 static void SimHDF5DetectorTaskC(void *drvPvt)
 {
   // Cast our void pointer into the SimHDF5Detector class
@@ -23,6 +30,18 @@ static void SimHDF5DetectorTaskC(void *drvPvt)
   pPvt->acqTask();
 }
 
+/** Constructor.
+  * \param[in] portName name of the asyn port for this driver.
+  * \param[in] maxBuffers The maximum number of NDArray buffers that the NDArrayPool for this driver is
+  *            allowed to allocate. Set this to 0 to allow an unlimited number of buffers.
+  * \param[in] maxMemory The maximum amount of memory that the NDArrayPool for this driver is
+  *            allowed to allocate. Set this to 0 to allow an unlimited amount of memory.
+  * \param[in] priority The thread priority for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
+  * \param[in] stackSize The stack size for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
+  *
+  * Construct a new SimHDF5Detector object.  Acquisition thread is started during the
+  * construction of the object.
+  */
 SimHDF5Detector::SimHDF5Detector(const char *portName,
                                  int maxBuffers,
                                  size_t maxMemory,
@@ -111,6 +130,9 @@ SimHDF5Detector::SimHDF5Detector(const char *portName,
 
 }
 
+/** Main acquisition task.
+ *
+ */
 void SimHDF5Detector::acqTask()
 {
   int status = asynSuccess;
@@ -166,15 +188,7 @@ void SimHDF5Detector::acqTask()
     // Call the callbacks to update any changes
     callParamCallbacks();
 
-    // Simulate being busy during the exposure time.  Use epicsEventWaitWithTimeout so that
-    // manually stopping the acquisition will work
-//    if (acquireTime > 0.0){
-//      this->unlock();
-//      status = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
-//      this->lock();
-//    } else {
-      status = epicsEventTryWait(this->stopEventId);
-//    }
+    status = epicsEventTryWait(this->stopEventId);
     if (status == epicsEventWaitOK){
       acquire = 0;
       if (imageMode == ADImageContinuous){
@@ -272,6 +286,16 @@ void SimHDF5Detector::acqTask()
   }
 }
 
+/** Sets an int32 parameter.
+  * \param[in] pasynUser asynUser structure that contains the function code in pasynUser->reason.
+  * \param[in] value The value for this parameter
+  *
+  * Takes action if the function code requires it.  This following parameters are supported:
+  * ADAcquire - Start and stop an acquisition.
+  * ADSim_DsetIndex - Select the dataset required for processing.
+  * ADSim_XDim - Select which dataset dimension should be used for the width.
+  * ADSim_YDim - Select which dataset dimension should be used for the height.
+  */
 asynStatus SimHDF5Detector::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   int addr=0;
@@ -360,6 +384,16 @@ asynStatus SimHDF5Detector::writeInt32(asynUser *pasynUser, epicsInt32 value)
   return status;
 }
 
+/** Called when asyn clients call pasynOctet->write().
+  * \param[in] pasynUser pasynUser structure that encodes the reason and address.
+  * \param[in] value Address of the string to write.
+  * \param[in] nChars Number of characters to write.
+  * \param[out] nActual Number of characters actually written.
+  *
+  * For all parameters it sets the value in the parameter library and calls any registered
+  * callbacks.  The following parameters are supported:
+  * ADSim_Filename - Load the HDF5 data file ready for an acquisition.
+  */
 asynStatus SimHDF5Detector::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
 {
   int addr=0;
@@ -415,6 +449,10 @@ asynStatus SimHDF5Detector::writeOctet(asynUser *pasynUser, const char *value, s
   return status;
 }
 
+/** Read an image from the HDF5 file into the NDArray pointer.
+  * \param[in] index used to determine which array within the selected dataset
+  *            will be used as the image for this frame.
+  */
 asynStatus SimHDF5Detector::readImage(int index)
 {
   int status = asynSuccess;
@@ -456,14 +494,18 @@ asynStatus SimHDF5Detector::readImage(int index)
     dsetIndex--;
 
     std::vector<int> dims = fileReader->getDatasetDimensions(fileReader->getDatasetKeys()[dsetIndex]);
-    //std::cout << "Dimensions [";
-    //for (int i = 0; i < dims.size(); i++){
-    //  std::cout << dims[i];
-    //  if (i != dims.size()-1){
-    //    std::cout << ", ";
-    //  }
-    //}
-    //std::cout << "]" << std::endl;
+    std::stringstream ss;
+    ss << "%s:%s: Dimensions [";
+    for (unsigned int i = 0; i < dims.size(); i++){
+      ss << dims[i];
+      if (i != dims.size()-1){
+        ss << ", ";
+      }
+    }
+    ss << "]\n";
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+              ss.str().c_str(),
+              driverName, functionName);
 
     getIntegerParam(ADSim_XDim, &xdim);
     getIntegerParam(ADSim_YDim, &ydim);
@@ -488,14 +530,18 @@ asynStatus SimHDF5Detector::readImage(int index)
           ci++;
         }
       }
-      //std::cout << "Indexes [";
-      //for (int i = 0; i < (dims.size()-2); i++){
-      //  std::cout << indexes[i];
-      //  if (i != dims.size()-3){
-      //    std::cout << ", ";
-      //  }
-      //}
-      //std::cout << "]" << std::endl;
+      ss.str("");
+      ss << "%s:%s: Indexes [";
+      for (unsigned int i = 0; i < (dims.size()-2); i++){
+        ss << indexes[i];
+        if (i != dims.size()-3){
+          ss << ", ";
+        }
+      }
+      ss << "]\n";
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+                ss.str().c_str(),
+                driverName, functionName);
 
       // Read out the image into the array
       fileReader->readFromDataset(fileReader->getDatasetKeys()[dsetIndex], xdim, ydim, indexes, this->pRaw->pData);
@@ -504,6 +550,10 @@ asynStatus SimHDF5Detector::readImage(int index)
   return (asynStatus)status;
 }
 
+/** Load the HDF5 file specified by the filename parameter.
+ *
+ * Validation checks are carried out before the file is loaded.
+  */
 asynStatus SimHDF5Detector::loadFile()
 {
   // Retrieve the filename
@@ -548,6 +598,12 @@ asynStatus SimHDF5Detector::loadFile()
   return status;
 }
 
+/** Read dataset information from the loaded HDF5 file.
+ *
+ * The dataset index parameter <b>ADSim_DsetIndex</b> is used to
+ * select the specific dataset that will be used as the data source.
+ * The information relating to that dataset is then read and processed.
+  */
 asynStatus SimHDF5Detector::readDatasetInfo()
 {
   int dsetIndex = 0;
@@ -612,6 +668,11 @@ asynStatus SimHDF5Detector::readDatasetInfo()
   return status;
 }
 
+/** Update the detector parameters with the selected dataset info.
+ *
+ * The detector parameters for image size, array bytes and data type
+ * are updated by this method.
+ */
 asynStatus SimHDF5Detector::updateSourceImage()
 {
   int dsetIndex = 0;
@@ -681,6 +742,8 @@ asynStatus SimHDF5Detector::updateSourceImage()
   return status;
 }
 
+/** Destructor.
+ */
 SimHDF5Detector::~SimHDF5Detector()
 {
 }
