@@ -1,14 +1,24 @@
 /**
 \mainpage simHDF5Detector EPICS Support Module
 \section intro_sec Introduction
-I'm going to describe the module here, possibly with a <a href="http://www.google.co.uk">web link to the manufacturers webpage</a>. \n
-You can also link to \ref thing.vdb "internally generated documentation" with alternate text, or by just by mentioning its name, e.g. thing.vdb
+The simHDF5Detector module provides a driver for AreaDetector that can replay previously recorded HDF5 datasets.  Previously captured (or
+newly generated) HDF5 files can be loaded into the driver and replayed at a chosen rate of frames per second.  It is possible to select a ROI,
+and the starting point within the dataset can be specified (to start the replay from any frame contained within the dataset).  If the end of the
+dataset is reached then the driver wraps around to continue from the start.
 
 \section bugs_sec Known Bugs
-- I'm going to describe any known bugs here
+- Period to fps calculation could be improved to use absolute time from start time.
+- Only datasets with 3 dimensions or more can be loaded.  This means single frame HDF5 files are not currently supported.
 
 \section user_sec User Manual
-This section contains instructions for the end user
+\image html simHDF5Detector.png "simHDF5Detector edm example screen."
+This simulator works by reading in a previously acquired dataset and then using that dataset to reproduce the arrays.  It can only accept HDF5 files, and once a file has been selected and loaded the application will try to find the correct dataset within the file.  The application displays how many candidate datasets were found within the file (see above) and if this value is greater than one then the selected dataset can be changed by setting a new value in the "Dataset Index" box.  The path of the currently selected index is displayed below the index entry.
+
+Once a dataset has been selected the dimensions are displayed and the dimensions used for the width and height (sensor size) are set along with the array size in bytes.  The region parameters can be used to set a new region of interest.  If a region of interest has been selected then when an acquisition is started only the specified region is read from each frame of the original dataset.
+
+The "Acquire Period" entry can be used to control the speed of the acquisition, and once the acquisition has been started the counter value is used to calculate which image within the dataset should be used.  The counter can be set to any value prior to starting an acquisition to allow data replay of specific times/rows etc to take place.  For example if an acquisition of 600x600 frames was loaded with the frame size of 128x128, then setting the counter to 10000 would start the acquisition at [16, 400], and then continue in sequence incrementing in the second dimension until it reached 600 at which point the first dimension would become 17 and the second dimension would reset to 0.  This method should result in an identical acquisition being replayed by this simulator for any loaded HDF5 file.
+
+New files can be loaded by simply entering the new filename into the "File path of HDF5 data file" box.
 
 \section build_sec Build Instructions 
 - \subpage build_instructions_example
