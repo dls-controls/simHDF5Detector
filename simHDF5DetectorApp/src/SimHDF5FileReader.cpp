@@ -265,7 +265,7 @@ void SimHDF5FileReader::readFromDataset(const std::string& dname, int minX, int 
 /** Prepare information required to read out dataset data.
   * \param[in] dname Name of the dataset
   * \param[in] minX offset of data in x dimension
-  * \param[in] MinY offset of data in y dimension
+  * \param[in] minY offset of data in y dimension
   * \param[in] sizeX ROI of data in x dimension
   * \param[in] sizeY ROI of data in y dimension
   * \param[in] wdim specified dimension number for x dimension
