@@ -67,6 +67,8 @@ private:
   asynStatus loadFile();
   asynStatus readDatasetInfo();
   asynStatus updateSourceImage();
+  asynStatus verifySizes();
+  asynStatus setArraySizes();
 
   std::tr1::shared_ptr<SimHDF5FileReader> fileReader;  // Filereader used for importing HDF5 datasets
   bool validFile;                                      // Is the current file valid?

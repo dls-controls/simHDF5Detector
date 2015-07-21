@@ -188,7 +188,9 @@ void SimHDF5Detector::acqTask()
     // Call the callbacks to update any changes
     callParamCallbacks();
 
+    this->unlock();
     status = epicsEventTryWait(this->stopEventId);
+    this->lock();
     if (status == epicsEventWaitOK){
       acquire = 0;
       if (imageMode == ADImageContinuous){
@@ -359,6 +361,15 @@ asynStatus SimHDF5Detector::writeInt32(asynUser *pasynUser, epicsInt32 value)
         // If a bad value is set then revert it to the original
         setIntegerParam(function, oldvalue);
       }
+    } else if (function == ADMinX || function == ADMinY || function == ADSizeX || function == ADSizeY){
+      // Get the values and verify they are OK
+      status = verifySizes();
+      if (status == asynError){
+        // If a bad value is set then revert it to the original
+        setIntegerParam(function, oldvalue);
+      } else {
+        setArraySizes();
+      }
     } else {
       if (function < FIRST_ADSIM_DETECTOR_PARAM){
         // If this parameter belongs to a base class call its method
@@ -460,16 +471,21 @@ asynStatus SimHDF5Detector::readImage(int index)
   size_t dims[2];
   int itype;
   int width, height;
+  int minX, minY;
   NDDataType_t dataType;
   int dsetIndex = 0;
   int xdim, ydim;
   const char *functionName = "readImage";
 
   // Get the datatype
-  status |= getIntegerParam(NDDataType, &itype); dataType = (NDDataType_t)itype;
+  status |= getIntegerParam(NDDataType, &itype);
+  dataType = (NDDataType_t)itype;
   // Get the dimensions
   status |= getIntegerParam(NDArraySizeX, &width);
   status |= getIntegerParam(NDArraySizeY, &height);
+  // Get the offsets
+  status |= getIntegerParam(ADMinX, &minX);
+  status |= getIntegerParam(ADMinY, &minY);
 
   ndims = 2;
   dims[0] = width;
@@ -544,7 +560,7 @@ asynStatus SimHDF5Detector::readImage(int index)
                 driverName, functionName);
 
       // Read out the image into the array
-      fileReader->readFromDataset(fileReader->getDatasetKeys()[dsetIndex], xdim, ydim, indexes, this->pRaw->pData);
+      fileReader->readFromDataset(fileReader->getDatasetKeys()[dsetIndex], minX, minY, width, height, xdim, ydim, indexes, this->pRaw->pData);
     }
   }
   return (asynStatus)status;
@@ -659,8 +675,8 @@ asynStatus SimHDF5Detector::readDatasetInfo()
 
     // Select XDim and YDim values that are the last and second last vector items
     // Note the parameters are not zero indexed but one!
-    setIntegerParam(ADSim_XDim, dims.size()-1);
-    setIntegerParam(ADSim_YDim, dims.size());
+    setIntegerParam(ADSim_XDim, dims.size());
+    setIntegerParam(ADSim_YDim, dims.size()-1);
 
     status = updateSourceImage();
   }
@@ -709,6 +725,8 @@ asynStatus SimHDF5Detector::updateSourceImage()
       setIntegerParam(ADMaxSizeY, dims[ydim]);
       setIntegerParam(ADSizeX, dims[xdim]);
       setIntegerParam(ADSizeY, dims[ydim]);
+      setIntegerParam(ADMinX, 0);
+      setIntegerParam(ADMinY, 0);
 
       // Get the data type for the dataset
       NDDataType_t type = fileReader->getDatasetType(fileReader->getDatasetKeys()[dsetIndex]);
@@ -739,6 +757,101 @@ asynStatus SimHDF5Detector::updateSourceImage()
       setIntegerParam(NDArraySize, dims[xdim]*dims[ydim]*bytes);
     }
   }
+  return status;
+}
+
+/** Verify the specified sizes are within the bounds of the data source.
+ *
+ * Reads the minX, minY, sizeX, sizeY and verifies they do not exceed the
+ * size of the source image.
+ */
+asynStatus SimHDF5Detector::verifySizes()
+{
+  asynStatus status = asynSuccess;
+  int minX = 0;
+  int sizeX = 0;
+  int minY = 0;
+  int sizeY = 0;
+  int maxX = 0;
+  int maxY = 0;
+  const char *functionName = "verifySizes";
+
+  // Get the min x,y of the image
+  getIntegerParam(ADMinX, &minX);
+  getIntegerParam(ADMinY, &minY);
+  // Get the size of the image
+  getIntegerParam(ADSizeX, &sizeX);
+  getIntegerParam(ADSizeY, &sizeY);
+  // Get the max size of the image
+  getIntegerParam(ADMaxSizeX, &maxX);
+  getIntegerParam(ADMaxSizeY, &maxY);
+
+  // Check that minX+sizeX is not greater than maxX
+  if ((minX+sizeX) > maxX){
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: Invalid X size requested minX: %d sizeX: %d\n",
+              driverName, functionName, minX, sizeX);
+    status = asynError;
+  }
+  if (status == asynSuccess){
+    // Check that minY+sizeY is not greater than maxY
+    if ((minY+sizeY) > maxY){
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: Invalid Y size requested minX: %d sizeX: %d\n",
+                driverName, functionName, minX, sizeX);
+      status = asynError;
+    }
+  }
+  return status;
+}
+
+/** Calculated the NDArray size according to the requested ROI.
+ *
+ * Reads the sizeX and sizeY and calculates the size of the NDArray
+ * according to the datatype.
+ */
+asynStatus SimHDF5Detector::setArraySizes()
+{
+  asynStatus status = asynSuccess;
+  int sizeX = 0;
+  int sizeY = 0;
+  int type = 0;
+  const char *functionName = "verifySizes";
+
+  // Get the size of the image
+  getIntegerParam(ADSizeX, &sizeX);
+  getIntegerParam(ADSizeY, &sizeY);
+
+  // Read the number of bytes for the datatype and set the NDArray parameters accordingly
+  setIntegerParam(NDArraySizeX, sizeX);
+  setIntegerParam(NDArraySizeY, sizeY);
+
+  getIntegerParam(NDDataType, &type);
+
+  int bytes = 0;
+  switch (type)
+  {
+    case NDInt8:
+    case NDUInt8:
+      bytes = 1;
+      break;
+    case NDInt16:
+    case NDUInt16:
+      bytes = 2;
+      break;
+    case NDInt32:
+    case NDUInt32:
+    case NDFloat32:
+      bytes = 4;
+      break;
+    case NDFloat64:
+      bytes = 8;
+  }
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: Calculating array sizeX: %d sizeY: %d bytes: %d\n",
+            driverName, functionName, sizeX, sizeY, bytes);
+
+  setIntegerParam(NDArraySize, sizeX*sizeY*bytes);
   return status;
 }
 

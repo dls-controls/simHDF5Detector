@@ -31,8 +31,8 @@ public:
   std::vector<int> getDatasetDimensions(const std::string& dname);
   NDDataType_t getDatasetType(const std::string& dname);
   void prepareToReadDataset(const std::string& dname);
-  void readFromDataset(const std::string& dname, int wdim, int hdim, void *data);
-  void readFromDataset(const std::string& dname, int wdim, int hdim, int *indexes, void *data);
+  void readFromDataset(const std::string& dname, int minX, int minY, int sizeX, int sizeY, int wdim, int hdim, void *data);
+  void readFromDataset(const std::string& dname, int minX, int minY, int sizeX, int sizeY, int wdim, int hdim, int *indexes, void *data);
   void cleanupDataset();
   void process(hid_t loc_id, const char *name, H5G_obj_t type);
 

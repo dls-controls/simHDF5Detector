@@ -10,6 +10,15 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 
+/** C function called when inspecting the HDF5 for datasets.
+  * \param[in] loc_id Internal ID of the HDF5 object.
+  * \param[in] name pointer to the name of the HF5 object.
+  * \param[in] opdata void pointer to the object that started the inspection.
+  *
+  * C function callback invoked by inspecting the HDF5 file.  The pointer will point
+  * to the SimHDF5FileReader object that started the inspection and can be used to
+  * call the appropriate method.
+  */
 herr_t file_info(hid_t loc_id, const char *name, void *opdata)
 {
   H5G_stat_t statbuf;
@@ -22,6 +31,10 @@ herr_t file_info(hid_t loc_id, const char *name, void *opdata)
   return 0;
 }
 
+/** Constructor.
+  *
+  * Sets default values for all member variables.
+  */
 SimHDF5FileReader::SimHDF5FileReader() :
   file(0),
   filename(""),
@@ -37,21 +50,39 @@ SimHDF5FileReader::SimHDF5FileReader() :
 
 }
 
+/** Destructor.
+  *
+  */
 SimHDF5FileReader::~SimHDF5FileReader()
 {
 
 }
 
+/** Set the filename of the HDF5 to read.
+  * \param[in] filename including full path of the HDF5 to read.
+  *
+  */
 void SimHDF5FileReader::setFilename(const std::string &filename)
 {
   this->filename = filename;
 }
 
+/** Get the filename of the HDF5 to read.
+  * \return filename including full path of the HDF5 to read.
+  *
+  */
 std::string SimHDF5FileReader::getFilename()
 {
   return filename;
 }
 
+/** Validate the filename.
+  *
+  * This method checks that the file exists.  If it does then an
+  * attempt is made to open the file using the HDF library.  If
+  * the file is successfully opened then the file is considered
+  * valid.
+  */
 bool SimHDF5FileReader::validateFilename()
 {
   bool validated = true;
@@ -75,12 +106,22 @@ bool SimHDF5FileReader::validateFilename()
   return validated;
 }
 
+/** Validate the filename.
+  * \return integer value of whether the file exists.
+  *
+  * This method checks that the file stored in filename exists.
+  */
 int SimHDF5FileReader::fileExists()
 {
   struct stat buffer;
   return (stat (filename.c_str(), &buffer) == 0);
 }
 
+/** Load the filename and inspect it.
+  *
+  * The file specified by filename is opened and then inspected
+  * for datasets.
+  */
 void SimHDF5FileReader::loadFile()
 {
   if (fileLoaded){
@@ -94,6 +135,9 @@ void SimHDF5FileReader::loadFile()
   H5Giterate(file, "/", NULL, file_info, this);
 }
 
+/** Unload currently loaded file and clear resources.
+  *
+  */
 void SimHDF5FileReader::unloadFile()
 {
   if (fileLoaded){
@@ -105,6 +149,10 @@ void SimHDF5FileReader::unloadFile()
   }
 }
 
+/** Return an array of dataset keys found within the file.
+  * \return vector of string dataset key values.
+  *
+  */
 std::vector<std::string> SimHDF5FileReader::getDatasetKeys()
 {
   std::vector<std::string> keys;
@@ -115,6 +163,13 @@ std::vector<std::string> SimHDF5FileReader::getDatasetKeys()
   return keys;
 }
 
+/** Return the specified dataset dimensions.
+  * \param[in] dname Name of the dataset
+  * \return vector of integer dimensions.
+  *
+  * Returns the dimensions of the specified dataset as a vector of
+  * integer values.
+  */
 std::vector<int> SimHDF5FileReader::getDatasetDimensions(const std::string& dname)
 {
   std::vector<int> dimensions;
@@ -131,6 +186,12 @@ std::vector<int> SimHDF5FileReader::getDatasetDimensions(const std::string& dnam
   return dimensions;
 }
 
+/** Return the specified dataset type.
+  * \param[in] dname Name of the dataset
+  * \return data type of the dataset.
+  *
+  * Returns the data type as a NDDataType_t type.
+  */
 NDDataType_t SimHDF5FileReader::getDatasetType(const std::string& dname)
 {
   NDDataType_t NDType = NDUInt8;
@@ -175,6 +236,12 @@ NDDataType_t SimHDF5FileReader::getDatasetType(const std::string& dname)
   return NDType;
 }
 
+/** Prepare information required to read out dataset data.
+  * \param[in] dname Name of the dataset
+  *
+  * Allocates the required resources ready to read out the data for
+  * the specified dataset.
+  */
 void SimHDF5FileReader::prepareToReadDataset(const std::string& dname)
 {
   if (!reading){
@@ -189,13 +256,27 @@ void SimHDF5FileReader::prepareToReadDataset(const std::string& dname)
   }
 }
 
-void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int hdim, void *data)
+void SimHDF5FileReader::readFromDataset(const std::string& dname, int minX, int minY, int sizeX, int sizeY, int wdim, int hdim, void *data)
 {
   int indexes[6] = {0,0,0,0,0,0};
-  readFromDataset(dname, wdim, hdim, indexes, data);
+  readFromDataset(dname, minX, minY, sizeX, sizeY, wdim, hdim, indexes, data);
 }
 
-void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int hdim, int *indexes, void *data)
+/** Prepare information required to read out dataset data.
+  * \param[in] dname Name of the dataset
+  * \param[in] minX offset of data in x dimension
+  * \param[in] MinY offset of data in y dimension
+  * \param[in] sizeX ROI of data in x dimension
+  * \param[in] sizeY ROI of data in y dimension
+  * \param[in] wdim specified dimension number for x dimension
+  * \param[in] hdim specified dimension number for y dimension
+  * \param[in] indexes index values for additional dimensions
+  * \param[out] data pointer to buffer for storing data
+  *
+  * Fills the data buffer with the data required according to the supplied
+  * indexes, offsets and ROI parameters.
+  */
+void SimHDF5FileReader::readFromDataset(const std::string& dname, int minX, int minY, int sizeX, int sizeY, int wdim, int hdim, int *indexes, void *data)
 {
   hid_t memspace;    // Memory space ID
   hsize_t dimsm[2];  // Memory space dimensions
@@ -212,8 +293,12 @@ void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int 
   int ofsindex = 0;
   for (int index = 0; index < ndims; index++){
     if (index == wdim || index == hdim){
-      // This is a frame dimension, so set the offset to 0
-      offset[index] = 0;
+      // This is a frame dimension, so set the offset to minX, minY
+      if (index == wdim){
+        offset[index] = minX;
+      } else if (index == hdim){
+        offset[index] = minY;
+      }
     } else {
       // Set the offset to the specified index
       offset[index] = indexes[ofsindex];
@@ -223,22 +308,22 @@ void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int 
   }
   // Now set the count dimensions for the chosen width, height to the real
   // dimension sizes for the chosen width, height
-  count[wdim] = dims[wdim];
-  count[hdim] = dims[hdim];
+  count[wdim] = sizeX;
+  count[hdim] = sizeY;
   // Select the hyperslab
   status = H5Sselect_hyperslab(dspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
 
   // Define the memory dataspace.
-  dimsm[0] = dims[wdim];
-  dimsm[1] = dims[hdim];
+  dimsm[1] = sizeX;
+  dimsm[0] = sizeY;
   int ndimsout = 2;
   memspace = H5Screate_simple(ndimsout,dimsm,NULL);
 
   // Define memory hyperslab.  This is only 2 dimensional no matter how many dims there are
   offset_out[0] = 0;
   offset_out[1] = 0;
-  count_out[0]  = dims[wdim];
-  count_out[1]  = dims[hdim];
+  count_out[1]  = sizeX;
+  count_out[0]  = sizeY;
   // Select the memory hyperslab
   status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, count_out, NULL);
 
@@ -248,6 +333,9 @@ void SimHDF5FileReader::readFromDataset(const std::string& dname, int wdim, int 
   H5Sclose(memspace);
 }
 
+/** Cleanup all resources after completion of reading out current dataset.
+  *
+  */
 void SimHDF5FileReader::cleanupDataset()
 {
   if (reading){
@@ -260,6 +348,15 @@ void SimHDF5FileReader::cleanupDataset()
   }
 }
 
+/** Process an HDF5 object and store the datasets.
+  * \param[in] loc_id Internal ID of the HDF5 object.
+  * \param[in] name pointer to the name of the HF5 object.
+  * \param[in] type HDF5 object type.
+  *
+  * This method is called by the C function callback <b>file_info</b> invoked by
+  * inspecting the HDF5 file.  Any datasets are stored in a map of dataset objects
+  * to allow the driver to quickly retrieve information relating to each dataset.
+  */
 void SimHDF5FileReader::process(hid_t loc_id, const char *name, H5G_obj_t type)
 {
   std::string sname(name);
