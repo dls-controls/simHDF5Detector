@@ -23,9 +23,9 @@ TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
 SUPPORT = /dls_sw/prod/R3.14.12.3/support
 
-ADCORE =$(SUPPORT)/areaDetector/1-9dls17
-ASYN   =$(SUPPORT)/asyn/4-21
-HDF5   =/dls_sw/prod/tools/RHEL6-x86_64/hdf5/1-8-14/prefix
+ADCORE = $(SUPPORT)/ADCore/2-3dls3
+ASYN   = $(SUPPORT)/asyn/4-26
+HDF5   = /dls_sw/prod/tools/RHEL6-x86_64/hdf5-swmr/1-9-222/prefix
 
 # EPICS_BASE usually appears last so other apps can override stuff:
 EPICS_BASE=/dls_sw/epics/R3.14.12.3/base

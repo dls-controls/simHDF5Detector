@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<components arch="linux-x86">
+<components arch="linux-x86_64">
 	<simHDF5Detector.SimHDF5Detector ADDR="0" P="SIM-HDF5-DET-01:" PORT="SIM.CAM" R="CAM:" TIMEOUT="1"/>
-	<ffmpegServer.diagnosticPlugins CAM="SIM.CAM" P="SIM-HDF5-DET-01:" PORTPREFIX="SIM" name="SIM.PLUGINS"/>
+	<adUtil.gdaPlugins CAM="SIM.CAM" P="SIM-HDF5-DET-01:" PORTPREFIX="SIM"/>
 </components>
