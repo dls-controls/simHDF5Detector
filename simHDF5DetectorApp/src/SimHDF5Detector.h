@@ -11,6 +11,8 @@
 #include <epicsEvent.h>
 #include "ADDriver.h"
 #include "SimHDF5FileReader.h"
+#include "SimHDF5MemoryReader.h"
+#include "SimHDF5Reader.h"
 
 #define str_ADSim_Filename        "ADSim_Filename"
 #define str_ADSim_FileValid       "ADSim_FileValid"
@@ -70,7 +72,7 @@ private:
   asynStatus verifySizes();
   asynStatus setArraySizes();
 
-  std::tr1::shared_ptr<SimHDF5FileReader> fileReader;  // Filereader used for importing HDF5 datasets
+  std::tr1::shared_ptr<SimHDF5Reader> fileReader;      // Filereader used for importing HDF5 datasets
   bool validFile;                                      // Is the current file valid?
   epicsEventId startEventId;                           // Event used to signal acquisition start
   epicsEventId stopEventId;                            // Event used to signal acquisition stop

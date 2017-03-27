@@ -104,6 +104,7 @@ SimHDF5Detector::SimHDF5Detector(const char *portName,
 
   // Create the file reader object for parsing HDF5 simulated source files
   fileReader = std::tr1::shared_ptr<SimHDF5FileReader>(new SimHDF5FileReader());
+  //fileReader = std::tr1::shared_ptr<SimHDF5MemoryReader>(new SimHDF5MemoryReader());
 
   // Create the epicsEvents for signalling to the acq task when acquisition starts and stops
   this->startEventId = epicsEventCreate(epicsEventEmpty);
@@ -202,7 +203,9 @@ void SimHDF5Detector::acqTask()
     }
 
     // Update the image
+    this->unlock();
     status = readImage(arrayCounter);
+    this->lock();
     if (status) continue;
 
     if (!acquire) continue;
@@ -502,6 +505,7 @@ asynStatus SimHDF5Detector::readImage(int index)
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: error allocating raw buffer\n",
               driverName, functionName);
+    status = asynError;
   }
 
   if (status == asynSuccess){

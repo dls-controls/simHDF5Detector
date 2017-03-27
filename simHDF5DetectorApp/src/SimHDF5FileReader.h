@@ -14,8 +14,9 @@
 #include <vector>
 #include <tr1/memory>
 #include "NDArray.h"
+#include "SimHDF5Reader.h"
 
-class SimHDF5FileReader
+class SimHDF5FileReader : public SimHDF5Reader
 {
 public:
   SimHDF5FileReader();
@@ -48,6 +49,10 @@ private:
   hid_t type_id;
   hid_t ntype_id;
   bool reading;
+  bool inMemory;
+  void *rawPtr;
+  std::vector<int> memDims;
+  NDDataType_t memDatatype;
 
   class HDF5Dataset
   {
