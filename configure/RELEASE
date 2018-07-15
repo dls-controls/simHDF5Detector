@@ -21,14 +21,15 @@
 
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
-SUPPORT = /dls_sw/prod/R3.14.12.3/support
+SUPPORT = /dls_sw/prod/R3.14.12.7/support
+WORK = /dls_sw/work/R3.14.12.7/support
 
-ADCORE = $(SUPPORT)/ADCore/2-3dls3
-ASYN   = $(SUPPORT)/asyn/4-26
-HDF5   = /dls_sw/prod/tools/RHEL6-x86_64/hdf5-swmr/1-9-222/prefix
+ADCORE = $(WORK)/ADCore
+ASYN   = $(SUPPORT)/asyn/4-33
+HDF5   = /dls_sw/prod/tools/RHEL7-x86_64/hdf5/1-10-2/prefix
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/dls_sw/epics/R3.14.12.3/base
+EPICS_BASE=/dls_sw/epics/R3.14.12.7/base
 
 # Set RULES here if you want to take build rules from somewhere
 # other than EPICS_BASE:
