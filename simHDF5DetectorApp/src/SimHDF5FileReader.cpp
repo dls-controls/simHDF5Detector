@@ -99,7 +99,7 @@ bool SimHDF5FileReader::validateFilename()
 
   if (validated){
     // Now attempt to open the file
-    fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, NULL);
+    fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     if (fid < 0){
       validated = false;
     } else {
@@ -133,7 +133,7 @@ void SimHDF5FileReader::loadFile()
     unloadFile();
   }
   // Open the file
-  file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, NULL);
+  file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
   fileLoaded = true;
   // Iterate through the file structure to obtain all datasets
   H5Giterate(file, "/", NULL, file_info, this);
@@ -149,7 +149,7 @@ void SimHDF5FileReader::unloadFile()
     datasets.clear();
     // Now force a close of the file, clearing out all references etc
     H5Fclose(this->file);
-    this->file = NULL;
+    this->file = -1;
   }
 }
 
@@ -362,7 +362,7 @@ void SimHDF5FileReader::prepareToReadDataset(const std::string& dname)
 
 
       H5Fclose(this->file);
-      this->file = NULL;
+      this->file = -1;
     }
     reading = true;
   }

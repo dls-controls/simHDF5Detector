@@ -93,7 +93,7 @@ bool SimHDF5MemoryReader::validateFilename()
 
   if (validated){
     // Now attempt to open the file
-    fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, NULL);
+    fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     if (fid < 0){
       validated = false;
     } else {
@@ -127,7 +127,7 @@ void SimHDF5MemoryReader::loadFile()
     unloadFile();
   }
   // Open the file
-  file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, NULL);
+  file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
   fileLoaded = true;
   // Iterate through the file structure to obtain all datasets
   H5Giterate(file, "/", NULL, file_mem_info, this);
