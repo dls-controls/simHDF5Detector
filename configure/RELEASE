@@ -22,7 +22,7 @@
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
 SUPPORT = /dls_sw/prod/R3.14.12.7/support
-WORK = /dls_sw/work/R3.14.12.7/support
+WORK    = /dls_sw/work/R3.14.12.7/support
 
 ADCORE = $(WORK)/ADCore
 ASYN   = $(SUPPORT)/asyn/4-33
