@@ -26,6 +26,6 @@ simHDF5Detector_LIBS += asyn
 simHDF5Detector_LIBS += ADBase
 simHDF5Detector_LIBS += $(EPICS_BASE_IOC_LIBS)
 
-USR_INCLUDES += $(HDF5)/include
+USR_INCLUDES += $(HDF5_INCLUDE)
 
 include $(TOP)/configure/RULES
