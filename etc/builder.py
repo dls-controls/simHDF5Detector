@@ -14,7 +14,7 @@ class SimHDF5Detector(AsynPort):
     # This tells xmlbuilder to use PORT instead of name as the row ID
     UniqueName = "PORT"
     _SpecificTemplate = SimHDF5DetectorTemplate
-    def __init__(self, PORT, BUFFERS = 50, MEMORY = 0, **args):
+    def __init__(self, PORT, MEMORY = 0, **args):
         # Init the superclass (AsynPort)
         self.__super.__init__(PORT)
         # Update the attributes of self from the commandline args
@@ -25,7 +25,6 @@ class SimHDF5Detector(AsynPort):
     # __init__ arguments
     ArgInfo = ADBaseTemplate.ArgInfo + _SpecificTemplate.ArgInfo + makeArgInfo(__init__,
         PORT = Simple('Port name for the detector', str),
-        BUFFERS = Simple('Maximum number of NDArray buffers to be created for plugin callbacks', int),
         MEMORY = Simple('Max memory to allocate, should be maxw*maxh*nbuffer for driver and all attached plugins', int))
 
     # Device attributes
@@ -34,6 +33,6 @@ class SimHDF5Detector(AsynPort):
 
     def Initialise(self):
         print '# SimHDF5DetectorConfig(portName, maxBuffers, maxMemory )'
-        print 'SimHDF5DetectorConfig( %(PORT)10s, %(BUFFERS)10d, %(MEMORY)9d )' % self.__dict__
+        print 'SimHDF5DetectorConfig( %(PORT)10s, 0, %(MEMORY)9d )' % self.__dict__
 
 
