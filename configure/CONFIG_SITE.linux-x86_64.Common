@@ -1,6 +1,6 @@
 CROSS_COMPILER_TARGET_ARCHS =
 
 # Define HDF5
-HDF5         = /dls_sw/prod/tools/RHEL7-x86_64/hdf5/1-10-3/prefix
+HDF5         = /dls_sw/prod/tools/RHEL7-x86_64/hdf5/1-10-5/prefix
 HDF5_LIB     = $(HDF5)/lib
 HDF5_INCLUDE = -I$(HDF5)/include
