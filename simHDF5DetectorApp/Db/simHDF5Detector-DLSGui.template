@@ -1,0 +1,82 @@
+# This associates a BOY screen with the template
+# % gui, $(PORT), boydetail, simHDF5DetectorApp_opi/simHDF5Det_detail.opi, P=$(P), R=$(R), DESC=Camera
+# % gui, $(PORT), boyembed, simHDF5DetectorApp_opi/simHDF5Det_embed_box.opi, P=$(P), R=$(R), DESC=Camera
+# % gui, $(PORT), boyembed, simHDF5DetectorApp_opi/simHDF5Det_embed.opi, P=$(P), R=$(R), DESC=Camera
+
+# These define what PVs a motor detail screen should contain
+# ADBase things
+# % gui, $(PORT), groupHeading, Info
+# % gui, $(PORT), readback, Port name,   $(P)$(R)PortName_RBV
+# % gui, $(PORT), readback, Manufacturer,   $(P)$(R)Manufacturer_RBV
+# % gui, $(PORT), readback, Model,   $(P)$(R)Model_RBV
+# % gui, $(PORT), readback, Detector state,   $(P)$(R)DetectorState_RBV
+# % gui, $(PORT), readback, Status message,   $(P)$(R)StatusMessage_RBV
+
+# % gui, $(PORT), groupHeading, Image
+# % gui, $(PORT), readback, Max size X,   $(P)$(R)MaxSizeX_RBV
+# % gui, $(PORT), readback, Max size Y,   $(P)$(R)MaxSizeY_RBV
+# % gui, $(PORT), demand, Region start X,   $(P)$(R)MinX
+# % gui, $(PORT), readback, Region start X,   $(P)$(R)MinX_RBV
+# % gui, $(PORT), demand, Region start Y,   $(P)$(R)MinY
+# % gui, $(PORT), readback, Region start Y,   $(P)$(R)MinY_RBV
+# % gui, $(PORT), demand, Region size X,   $(P)$(R)SizeX
+# % gui, $(PORT), readback, Region size X,   $(P)$(R)SizeX_RBV
+# % gui, $(PORT), demand, Region size Y,   $(P)$(R)SizeY
+# % gui, $(PORT), readback, Region size Y,   $(P)$(R)SizeY_RBV
+# % gui, $(PORT), readback, Array Size X,   $(P)$(R)ArraySizeX_RBV
+# % gui, $(PORT), readback, Array Size Y,   $(P)$(R)ArraySizeY_RBV
+# % gui, $(PORT), readback, Array Size,   $(P)$(R)ArraySize_RBV
+
+# % gui, $(PORT), groupHeading, Acquisition
+# % gui, $(PORT), demand, Acquire period,   $(P)$(R)AcquirePeriod
+# % gui, $(PORT), readback, Acquire period,   $(P)$(R)AcquirePeriod_RBV
+# % gui, $(PORT), readback, Time remaining,   $(P)$(R)TimeRemaining_RBV
+# % gui, $(PORT), enum, Frame type,   $(P)$(R)FrameType
+# % gui, $(PORT), readback, Frame type,   $(P)$(R)FrameType_RBV
+# % gui, $(PORT), enum, Image mode,   $(P)$(R)ImageMode
+# % gui, $(PORT), readback, Image mode,   $(P)$(R)ImageMode_RBV
+# % gui, $(PORT), demand, Num images,   $(P)$(R)NumImages
+# % gui, $(PORT), readback, Num images,   $(P)$(R)NumImages_RBV
+# % gui, $(PORT), readback, Image counter,   $(P)$(R)NumImagesCounter_RBV
+# % gui, $(PORT), enum, Acquire,   $(P)$(R)Acquire
+# % gui, $(PORT), readback, Acquire,   $(P)$(R)Acquire_RBV
+# % gui, $(PORT), demand, Array counter,   $(P)$(R)ArrayCounter
+# % gui, $(PORT), readback, Array counter,   $(P)$(R)ArrayCounter_RBV
+# % gui, $(PORT), readback, Array rate,   $(P)$(R)ArrayRate_RBV
+# % gui, $(PORT), enum, Array callbacks,   $(P)$(R)ArrayCallbacks
+# % gui, $(PORT), readback, Array callbacks,   $(P)$(R)ArrayCallbacks_RBV
+# % gui, $(PORT), demandString, Attributes file,   $(P)$(R)NDAttributesFile
+
+# % gui, $(PORT), groupHeading, Memory
+# % gui, $(PORT), readback, Max memory,   $(P)$(R)PoolMaxMem
+# % gui, $(PORT), readback, Max buffers,   $(P)$(R)PoolMaxBuffers
+# % gui, $(PORT), readback, Used memory,   $(P)$(R)PoolUsedMem
+# % gui, $(PORT), readback, Allocated buffers,   $(P)$(R)PoolAllocBuffers
+# % gui, $(PORT), readback, Free buffers,   $(P)$(R)PoolFreeBuffers
+# % gui, $(PORT), readback, Used buffers,   $(P)$(R)PoolUsedBuffers
+
+# simHDF5Detector parameters:
+
+# % gui, $(PORT), groupHeading, Source File
+# % gui, $(PORT), demandString, HDF5 data file,   $(P)$(R)Filename
+# % gui, $(PORT), readback, HDF5 data file,   $(P)$(R)Filename_RBV
+# % gui, $(PORT), readback, HDF5 file valid, $(P)$(R)FileValid_RBV
+
+# % gui, $(PORT), groupHeading, File Structure
+# % gui, $(PORT), readback, Dataset Name,   $(P)$(R)DatasetName_RBV
+# % gui, $(PORT), readback, No Of Datasets, $(P)$(R)NoOfDatasets_RBV
+# % gui, $(PORT), readback, Dataset Dimensions, $(P)$(R)NoOfDimensions_RBV
+# % gui, $(PORT), demand, Dataset Index, $(P)$(R)DatasetIndex
+# % gui, $(PORT), readback, Dataset Index, $(P)$(R)DatasetIndex_RBV
+# % gui, $(PORT), demand, Image X Dimension, $(P)$(R)XDimension
+# % gui, $(PORT), readback, Image X Dimension, $(P)$(R)XDimension_RBV
+# % gui, $(PORT), demand, Image Y Dimension, $(P)$(R)YDimension
+# % gui, $(PORT), readback, Image Y Dimension, $(P)$(R)YDimension_RBV
+
+# % gui, $(PORT), groupHeading, Dim Sizes
+# % gui, $(PORT), readback, Dim 1 Size, $(P)$(R)Dimension1_RBV
+# % gui, $(PORT), readback, Dim 2 Size, $(P)$(R)Dimension2_RBV
+# % gui, $(PORT), readback, Dim 3 Size, $(P)$(R)Dimension3_RBV
+# % gui, $(PORT), readback, Dim 4 Size, $(P)$(R)Dimension4_RBV
+# % gui, $(PORT), readback, Dim 5 Size, $(P)$(R)Dimension5_RBV
+# % gui, $(PORT), readback, Dim 6 Size, $(P)$(R)Dimension6_RBV

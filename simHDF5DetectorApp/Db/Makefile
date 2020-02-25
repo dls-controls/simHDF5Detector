@@ -12,6 +12,7 @@ include $(TOP)/configure/CONFIG
 # templates like this
 #
 DB += simHDF5Detector.template
+DB += simHDF5Detector-DLSGui.template
 
 
 include $(TOP)/configure/RULES

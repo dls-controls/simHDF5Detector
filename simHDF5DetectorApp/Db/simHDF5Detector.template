@@ -8,6 +8,7 @@
 # % gui, $(PORT), edmtab, simHDF5Detector.edl, P=$(P),R=$(R)
 
 include "ADBase.template"
+include "simHDF5Detector-DLSGui.template"
 
 record(ao, "$(P)$(R)AcquireTime") {
   field(DISA, "1")
