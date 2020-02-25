@@ -1,7 +1,7 @@
 # This associates a BOY screen with the template
-# % gui, $(PORT), boydetail, simHDF5DetectorApp_opi/simHDF5Det_detail.opi, P=$(P), R=$(R), DESC=Camera
-# % gui, $(PORT), boyembed, simHDF5DetectorApp_opi/simHDF5Det_embed_box.opi, P=$(P), R=$(R), DESC=Camera
-# % gui, $(PORT), boyembed, simHDF5DetectorApp_opi/simHDF5Det_embed.opi, P=$(P), R=$(R), DESC=Camera
+# % gui, $(PORT), boydetail, simHDF5DetectorApp_opi/simHDF5Det_detail.opi, P=$(P), R=$(R), DESC=simHDF5 Camera
+# % gui, $(PORT), boyembed, simHDF5DetectorApp_opi/simHDF5Det_embed_box.opi, P=$(P), R=$(R), DESC=simHDF5 Camera
+# % gui, $(PORT), boyembed, simHDF5DetectorApp_opi/simHDF5Det_embed.opi, P=$(P), R=$(R), DESC=simHDF5 Camera
 
 # These define what PVs a motor detail screen should contain
 # ADBase things
