@@ -7,6 +7,7 @@
 
 #include "SimHDF5MemoryReader.h"
 #include <iostream>
+#include <string.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 

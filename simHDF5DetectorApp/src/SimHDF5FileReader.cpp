@@ -7,6 +7,7 @@
 
 #include "SimHDF5FileReader.h"
 #include <iostream>
+#include <string.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 
